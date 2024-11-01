@@ -51,7 +51,75 @@ void setup() {
     while (1);
   }
   delay(2000);
-  
+  //OLED GuardianArea Logo
+  oled.clearDisplay();
+  oled.drawBitmap(0, 0, guardianAreaLogo, SCREEN_WIDTH, SCREEN_HEIGHT-10, WHITE);
+  oled.setCursor(28,55);
+  oled.setTextColor(WHITE);
+  oled.println("GuardianArea");
+  oled.display();
+  delay(2000);
+
+  //OLED Wi-Fi Initialization Animation
+  oled.clearDisplay();
+
+  //Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL);
+  while (WiFi.status() != WL_CONNECTED) {
+    oled.drawBitmap(48, 5, internetFrames[frame], HEART_FRAME_WIDTH, HEART_FRAME_HEIGHT, 1);
+    frame = (frame + 1) % HEART_FRAME_COUNT;
+    oled.setCursor(0,HEART_FRAME_HEIGHT + 10);
+    oled.print("Establishing Internet Connection");
+    oled.display();
+  }
+
+  //SD Card
+  Serial.print("Initializing SD card...");
+  SD.begin(SD_CS_PIN);
+  Serial.println("DONE.");
+  Serial.println("Listing root dir...");
+  File root = SD.open("/");
+  printDirectory(root, 0);
+  root.close();
+
+  //GuardianArea API Token 
+  File token = SD.open("/token.txt", FILE_READ);
+  tokenStr = "";
+  //If token.txt exists and can be opened
+  if(token){
+    //If token.txt is not empty then read the content
+    if(token.available()){
+      while (token.available()) {
+          tokenStr += (char)token.read();
+      }
+      token.close();
+    }
+    //token.txt is empty, request it to the server
+    else{
+      token.close();
+      token = SD.open("/token.txt", FILE_WRITE);
+      String jsonUUID;
+      doc["guardianAreaDeviceRecordId"] = DEVICE_UUID;
+      serializeJson(doc, jsonUUID);
+      String registerUrlStr = String(API_BASE_URL) + "/devices/register";
+      String jsonToken = post(registerUrlStr.c_str(), jsonUUID.c_str());
+      doc.clear();
+      DeserializationError error = deserializeJson(doc, jsonToken);
+      if (error) {
+        Serial.print("Error al analizar JSON: ");
+        Serial.println(error.c_str());
+      }
+      tokenStr = String(doc["apiKey"]);
+      Serial.print("Token successfuly obtained: ");
+      Serial.println(tokenStr);
+      token.print(tokenStr);
+      doc.clear();
+      token.close();
+    }
+  }
+  else{
+    Serial.println("An error has ocurred when opening the token.txt file");
+  }
 }
 
 void loop() {
@@ -82,6 +150,7 @@ void loop() {
 
   if (digitalRead(RECORD_BUTTON_PIN) == LOW) {
     recordAudio();
+    post("https://guardianarea.azurewebsites.net/api/v1/authentication/sign-up","{\"username\": \"test4\",\"email\": \"test@test.com\",\"firstName\": \"test\",\"lastName\": \"test\",\"password\": \"test123\",\"roles\": [\"ROLE_ADMIN\"]}");
   }
 
 }
