@@ -1,0 +1,56 @@
+{
+  "name": "max30102-pulse-sensor",
+  "author": "Digital Dart",
+   "pins": [
+    "VCC",
+    "GND",
+    "SDA",
+    "SCL",
+    "INT",
+    "",
+    "",
+    "IRD"
+  ],
+  "controls": [
+     {
+      "id": "pulseRate",
+      "label": "Beats Per Minute (BPM)",
+      "type": "range",
+      "min": 0,
+      "max": 300,
+      "step": 1
+    },
+    {
+      "id": "oxygen",
+      "label": "Oxygen Saturation (SpO2%)",
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    {
+      "id": "lowerPulseRateTreshold",
+      "label": "Lower BPM Treshold",
+      "type": "range",
+      "min": 0,
+      "max": 300,
+      "step": 1
+    },
+    {
+      "id": "upperPulseRateTreshold",
+      "label": "Upper BPM Treshold",
+      "type": "range",
+      "min": 0,
+      "max": 300,
+      "step": 1
+    },
+    {
+      "id": "lowerOxygenTreshold",
+      "label": "Lower SpO2% Treshold",
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
+  ]
+}
